@@ -22,4 +22,11 @@
       have the infrastructure for it in place.  Also, this software
       is or will be compatible with SOHT.
 
+4. Q: Why not HTTP-Tunnel (http://www.nocrew.org/software/httptunnel.html) ?
+      This project is redundant!
+   A: HTTP-Tunnel can accomplish the same goal as Reverse Utils::TCP-over-CGI
+      at probably utilize less CPU resources in doing so, it requires that
+      a dedicated webserver be used, or a different port.  TCP-over-CGI runs
+      as a CGI under any existing web server.
+
 Please send any further questions to me (Roy Keene <tcpcgi@rkeene.org>)
