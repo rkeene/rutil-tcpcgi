@@ -251,10 +251,18 @@ void *tcpcgi_getdata(char *http_host, int http_port, char *http_path, char *http
 
 	buf[sizeof(buf)-1]='\0';
 	if (use_post) {
-		fprintf(fp, "POST %s HTTP/1.0\r\nHost: %s:%i\r\n%sContent-length: %i\r\n\r\n%s\r\n", hex_path, http_host, http_port, http_auth, (int) strlen(buf), buf);
+		if (proxyhost) {
+			fprintf(fp, "POST http://%s:%i%s HTTP/1.0\r\nHost: %s:%i\r\n%sContent-length: %i\r\n\r\n%s\r\n", http_host, http_port, hex_path, http_host, http_port, http_auth, (int) strlen(buf), buf);
+		} else {
+			fprintf(fp, "POST %s HTTP/1.0\r\nHost: %s:%i\r\n%sContent-length: %i\r\n\r\n%s\r\n", hex_path, http_host, http_port, http_auth, (int) strlen(buf), buf);
+		}
 		PRINTERR("POST http://%s:%i%s?[%i]%s HTTP/1.0\n", http_host, http_port, hex_path, (int) strlen(buf), buf);
 	} else {
-		fprintf(fp, "GET %s:%i?%s HTTP/1.0\r\nHost: %s:%i\r\n%s\r\n", hex_path, http_port, buf, http_host, http_port, http_auth);
+		if (proxyhost) {
+			fprintf(fp, "GET http://%s:%i%s?%s HTTP/1.0\r\nHost: %s:%i\r\n%s\r\n", http_host, http_port, hex_path, buf, http_host, http_port, http_auth);
+		} else {
+			fprintf(fp, "GET %s?%s HTTP/1.0\r\nHost: %s:%i\r\n%s\r\n", hex_path, buf, http_host, http_port, http_auth);
+		}
 		PRINTERR("GET http://%s:%i%s?[%i]%s HTTP/1.0\n", http_host, http_port, hex_path, (int) strlen(buf), buf);
 	}
 	fflush(fp);
