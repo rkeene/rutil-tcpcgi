@@ -1,0 +1,25 @@
+1.  Q:  Passwords!?  Authentication!?
+    A:  Why delude yourself?  Adding a layer of obscurity like a
+        password sent clear-text across the network is no more
+        secure than renaming the CGI executable to azFFl.cgi
+        (other than the name is likely logged where the password
+         is not, but the people with the logs could easily get
+         the password anyway)
+
+2. Q: Why not HTun (http://htun.runslinux.net/) ?  This project
+      is redundant!
+   A: While HTun would be useful in some situations, it might
+      not be applicable to others, for example, HTun requires
+      you to be root on both ends of the connection.  HTun
+      also requires a little more effort to setup.  However,
+      if you need a full IP connection, HTun will be better
+      for you.
+
+3. Q: Why not SOHT (Sockets Over HTTP) ?  This project is
+      redundant!
+   A: Sockets Over HTTP (SOHT) is written in Java and requires a
+      substantial amount more effort to setup if you don't already
+      have the infrastructure for it in place.  Also, this software
+      is or will be compatible with SOHT.
+
+Please send any further questions to me (Roy Keene <tcpcgi@rkeene.org>)

@@ -1,0 +1,12 @@
+1.	To compile:
+		$ make
+	(if this fails, you may want to try GNU make)
+
+2.	Now put the resulting file "tcpcgi.cgi" on your webserver some
+	place that it can be executed as a CGI.
+
+3.	Run "tcpcgi" on your local machine with the proper options.
+	(see USAGE for information on the arguments)
+
+4.	Connect to your local machine on the port specified in "tcpcgi"
+	and use as normal.

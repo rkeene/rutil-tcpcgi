@@ -1,0 +1,15 @@
+This package is useful for connecting to hosts reachable by a webserver
+you have access to, but not reachable by you.  It allows you to use any
+host you have CGI access to as a proxy.  This means if you can exec CGI
+on a host, you can make connections from that host using TCP. Examples:
+
+1. If you have a machine [www.test1.com] that can only recieve HTTP
+   requests, but you want to make TCP connections to it on other ports
+   you can use this package to do that.
+
+2. It could also be used in a forward sense (though there might be
+   better options, like HTTP CONNECT) if you were behind a firewall
+   that only allows HTTP connections outbound.  You could setup a
+   webserver that has CGI capabilities and put the CGI component on
+   it.  Then on your firewalled side, run the client (tcpcgi), and
+   connect anywhere you want.

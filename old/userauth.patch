@@ -1,0 +1,113 @@
+diff -uNr rutil_tcpcgi-0.1.8-orig/Makefile rutil_tcpcgi-0.1.8-rsk/Makefile
+--- rutil_tcpcgi-0.1.8-orig/Makefile	2003-09-08 22:59:13.000000000 -0500
++++ rutil_tcpcgi-0.1.8-rsk/Makefile	2003-09-19 15:06:53.315360000 -0500
+@@ -1,21 +1,19 @@
+-CC = gcc
+-CFLAGS = -Wall
+-LDFLAGS = -lnsl
++CC = gcc
++CFLAGS = -Wall -DDEBUG
++LDFLAGS =
+ BINS = tcpcgi tcpcgi.cgi telnetd
+ TCPCGI_CGI_OBJS = tcpcgid.o cache.o
+ 
+-ifdef TCPCGID_STANDALONE
+-	CFLAGS += -DTCPCGID_STANDALONE
+-	BINS += tcpcgid
+-	TCPCGI_CGI_OBJS =
+-endif
+-
+ all: $(BINS)
+ 
+ tcpcgid: tcpcgid.o cache.o tcpnet.o
++	$(CC) $(LDFLAGS) -o $@ $^
+ tcpcgi: tcpcgi.o tcpnet.o
++	$(CC) $(LDFLAGS) -o $@ $^
+ tcpcgi.cgi: tcpcgi.cgi.o tcpnet.o $(TCPCGI_CGI_OBJS)
++	$(CC) $(LDFLAGS) -o $@ $^
+ telnetd: telnetd.o tcpnet.o
++	$(CC) $(LDFLAGS) -o $@ $^
+ 
+ tcpcgid.o: tcpcgid.c tcpcgi.h tcpnet.h cache.h tcpcgid.h
+ tcpnet.o: tcpnet.c tcpnet.h
+diff -uNr rutil_tcpcgi-0.1.8-orig/tcpcgi.c rutil_tcpcgi-0.1.8-rsk/tcpcgi.c
+--- rutil_tcpcgi-0.1.8-orig/tcpcgi.c	2003-09-08 21:33:12.000000000 -0500
++++ rutil_tcpcgi-0.1.8-rsk/tcpcgi.c	2003-09-19 17:46:30.505597000 -0500
+@@ -73,9 +73,40 @@
+ int local_only=0;
+ int poll_time_min=TCPCGI_CLIENT_POLLTIME_MIN;
+ int poll_time_max=TCPCGI_CLIENT_POLLTIME_MAX;
++char *userpass=NULL;
+ struct sockinfo socks_info[128]; /* Needs to be num of elements as socks_poll in main() */
+ 
+ 
++char *mimecode(void *databuf, int datalen) {
++	unsigned char buffer[3];
++	unsigned char *data=databuf;
++	char mimeabet[64]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
++	char *ret;
++	int outlen, retlen;
++	int i,x=0;
++
++	outlen=(int) ((((double) datalen)*1.3333333)+0.9);
++	retlen=((int) ((((double) datalen)/3.00)+0.9))*4;
++	ret=malloc(retlen+1);
++
++	for (i=0; i<datalen; i+=3) {
++		buffer[0]=data[i];
++		buffer[1]=data[i+1];
++		buffer[2]=data[i+2];
++		ret[x++]=mimeabet[((buffer[0]&0xfc)>>2)%sizeof(mimeabet)];
++		if (x>=outlen) break;
++		ret[x++]=mimeabet[(((buffer[0]&0x3)<<4)|((buffer[1]&0xf0)>>4))%sizeof(mimeabet)];
++		if (x>=outlen) break;
++		ret[x++]=mimeabet[(((buffer[1]&0xf)<<2)|((buffer[2]&0xc0)>>6))%sizeof(mimeabet)];
++		if (x>=outlen) break;
++		ret[x++]=mimeabet[(buffer[2]&0x3f)%sizeof(mimeabet)];
++		if (x>=outlen) break;
++	}
++	while (x!=retlen) ret[x++]='=';
++	ret[x]='\0';
++	return(ret);
++}
++
+ char *hexcode(void *data, int datalen) {
+ 	char hexabet[]="0123456789abcdef";
+ 	unsigned char *data_num=data;
+@@ -336,7 +367,7 @@
+ 
+ int print_help(char *msg) {
+ 	fprintf(stderr, "Usage: tcpcgi -H host -f file -d dest [-P port] [-p port] [-m time]\n");
+-	fprintf(stderr, "              [-x time] [-t time] [-b amt] [-rigluvh]\n");
++	fprintf(stderr, "              [-x time] [-t time] [-b amt] [-U user] [-rigluvh]\n");
+ 	fprintf(stderr, "    Options:\n");
+ 	fprintf(stderr, "         -H host      HTTP Server which has tcpcgi.cgi.\n");
+ 	fprintf(stderr, "         -f file      Full URL-relative on HTTP server to tcpcgi.cgi,\n");
+@@ -356,6 +387,8 @@
+ 	fprintf(stderr, "                      should multiply the backoff time by this number,\n");
+ 	fprintf(stderr, "                      otherwise it's incremented by this amount (2 is the\n"); 
+ 	fprintf(stderr, "                      default).\n");
++	fprintf(stderr, "         -U user      Username and password to use for proxy authentication\n");
++	fprintf(stderr, "                      (must be in the form of user:pass).\n");
+ 	fprintf(stderr, "         -r           Specify that the backoff algorithm reset when remote\n");
+ 	fprintf(stderr, "                      activity occurs, instead of decrementing.\n");
+ 	fprintf(stderr, "         -i           Specify that the backoff algorithm should respond to\n");
+@@ -414,7 +447,7 @@
+ 	pid_t chpid;
+ #endif
+ 
+-	while ((ch=getopt(argc, argv, "H:f:P:p:d:m:x:t:b:vgriulh"))!=-1) {
++	while ((ch=getopt(argc, argv, "H:f:P:p:d:m:x:t:b:U:vgriulh"))!=-1) {
+ 		switch (ch) {
+ 			case 'H':
+ 				http_host=strdup(optarg);
+@@ -472,6 +505,9 @@
+ 			case 'u':
+ 				proto_type=(proto_type==SOCK_STREAM)?SOCK_DGRAM:SOCK_STREAM;
+ 				break;
++			case 'U':
++				userpass=mimecode(optarg, strlen(optarg));
++				break;
+ 			case ':':
+ 			case '?':
+ 			case 'h':

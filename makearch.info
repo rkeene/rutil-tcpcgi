@@ -1,0 +1,6 @@
+UTIL="rutil_tcpcgi"
+BINS="tcpcgi tcpcgi.cgi"
+REQS=""
+DOCS="README INSTALL FAQ USAGE"
+DOC_HDR="HEADER"
+TMPS="HEADER old f bob"

@@ -1,0 +1,126 @@
+Usage: tcpcgi -H host -f file -d dest [-P port] [-p port] [-m time]
+              [-x time] [-t time] [-b amt] [-U user] [-riglvh]
+    Options:
+         -H host      HTTP Server which has tcpcgi.cgi.  This will be
+                      the server that creates all the final connections
+                      for the proxy.  It is required.
+                      Example:
+                      $ tcpcgi -H www.sally.com -f (see below)
+                      -d (see below)
+
+         -f file      Full URL-relative on HTTP server to tcpcgi.cgi,
+                      including tcpcgi.cgi. It is required.
+                      Example (cont'd):
+                      $ tcpcgi -H www.sally.com -f /~jim/tcpcgi.cgi
+                      -d (see below)
+
+         -d dest      Destination to for HTTP server to connect to and
+                      proxy to (must be in the form of host:port).
+                      Your connections will ultimately end up being
+                      proxied to this host and port. It is required.
+                      Example (cont'd):
+                      $ tcpcgi -H www.sally.com -f /~jim/tcpcgi.cgi
+                      -d localhost:22
+                          This will forward connections from
+                          (default of) localhost:9111 to
+                          localhost:22 from www.sally.com, which
+                          is really www.sally.com:22.  You can
+                          then do something like:
+                      $ ssh -l jim -C -t -x -p 9111 localhost
+                          to create your SSH session.
+
+         -P port      Port to connect to HTTP server on.  The default is
+                      80.  If your webserver listens on a different port
+                      you can use this option to specify that.
+
+         -p port      Port to listen for connections on locally (9111 is
+                      the default).  This can be any valid value that's
+                      not being used by something else.  If run as a user
+                      it must be greater than 1024.
+
+         -m time      Lowest amount of time (in milliseconds) to check for
+                      data from HTTP server (200 is the default).  (See
+                      below for details.)
+
+         -x time      Greatest amount of time (in milliseconds) to check
+                      for data from HTTP server (60000 is the default).
+                      Since you don't have a direct connection to either
+                      the target host or the webserver that is acting as
+                      a proxy, neither can alert you when there is data
+                      waiting to be read.  In order to over come this we
+                      periodically check with the webserver to see if
+                      there is any data waiting to be read from the
+                      target.  Since we have no idea what the data pattern
+                      might look like, we try to be adaptive and still
+                      not overwhelm the webserver with requests if it can
+                      be avoided.  Thus, everytime we check for data and
+                      none is there we check less often and when data
+                      is there we check more often.  The specifics of how
+                      much we change our values is specified below.
+                    
+
+         -t time      Specify that the amount of time for polling be fixed
+                      at this value (in ms).  This is the same as:
+                      "-m TIME -x TIME".
+
+         -b amt       Backoff amount, if less than 5, specifies backoff
+                      should multiply the backoff time by this number,
+                      otherwise it's incremented by this amount (2 is the
+                      default).  This value controls the backoff/backon
+                      algorithm.  If it is 1 through 4 it indicates that
+                      the backoff time should be multiplied when there is
+                      no traffic, and divided when traffic comes (unless
+                      the "-r" option is specified).  If the value is 5
+                      or greater then the value is taken to mean the
+                      absolute amount of time to adjust when there is no
+                      traffic (backoff time is lengthened by this amount),
+                      or there is traffic (backoff time is shortened by
+                      this amount).
+
+         -V proxy     Specify a host to send all HTTP traffic through.
+                      This is useful if you wish to proxy all of your
+                      traffic through another host (i.e., an HTTP proxy.)
+
+         -U user      Username and password to use for http authentication
+                      (must be in the form of user:pass).  This is useful
+                      if you have a proxy that requires authentication or
+                      access control on the directory with the CGI in it.
+
+         -r           Specify that the backoff algorithm reset when remote
+                      activity occurs, instead of decrementing.  This
+                      option will tell the backoff algorithm to reset
+                      to the minimum value whenever traffic occurs,
+                      instead of decrementing by one unit.  This would
+                      be good for connections that are infrequent but
+                      require interaction.
+
+         -i           Specify that the backoff algorithm should respond to
+                      local traffic as well as remote.  Normally the
+                      backoff algorithm responds only to events from the
+                      "remote" (HTTP) (since the backoff algorithm only
+                      affects how often that data is checked for, because
+                      directly connected ("local") clients can be
+                      responded to immediately), but this option changes
+                      that behavior to responding to both "remote" and
+                      "local" events.  This is helpful for connections
+                      that expect to get results after sending data.
+
+         -g           Toggle between HTTP get and HTTP post (POST is
+                      the default).  If you can't do HTTP POST for
+                      some reason, you can fallback to HTTP GET.
+
+         -l           Bind to LOCALHOST only for listening (ALL is the
+                      default).  Normally, anyone can connect to the
+                      listening port from any host, but this changes
+                      that to only list for connections on the loopback
+                      address so that only people with access to the
+                      loopback address can connect. (NOTE:  if you are
+                      running a webserver and allow anyone to run
+                      arbitrary programs as CGI, they can connect
+                      -- DUH!)
+
+         -u           Use UDP instead of TCP.  This may even work.
+
+         -v           Print version (@@VERS@@) and exit.
+
+         -h           Prints help information.
