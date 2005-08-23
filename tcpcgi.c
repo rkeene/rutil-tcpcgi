@@ -37,8 +37,6 @@
 
 #include <string.h>
 #define _XOPEN_SOURCE_EXTENDED
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
@@ -53,6 +51,8 @@
 #include <netdb.h>
 #include <errno.h>
 #include <time.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "tcpcgi.h"
 #include "tcpnet.h"

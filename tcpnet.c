@@ -29,15 +29,14 @@
 #include <fcntl.h>
 #include "tcpnet.h"
 
-#ifndef NO_NETWORK
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
 #include <errno.h>
 #include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 extern int errno;
 
@@ -110,10 +109,3 @@ int createconnection(char *host, int port, int type) {
 int createconnection_tcp(char *host, int port) {
 	return(createconnection(host,port,SOCK_STREAM));
 }
-
-#else
-int createlisten(int port, int localonly) { return(-1); }
-void closeconnection(int sockfd) { return; }
-int createconnection(char *host, int port, int type) { return(-1); }
-int createconnection_tcp(char *host, int port) { return(-1); }
-#endif

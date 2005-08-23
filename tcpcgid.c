@@ -21,7 +21,6 @@
 */
 #include <string.h>
 #define _XOPEN_SOURCE_EXTENDED
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/poll.h>
@@ -31,6 +30,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <sys/socket.h>
 
 #include "tcpcgid.h"
 #include "tcpcgi.h"
