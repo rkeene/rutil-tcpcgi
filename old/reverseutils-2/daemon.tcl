@@ -1,4 +1,6 @@
-#!/usr/bin/tcl
+#!/usr/bin/tclsh
+
+package require Tclx
 
 if {[lindex $argv 0]==""} { set Port "5906" } else { set Port [lindex $argv 0] }
 

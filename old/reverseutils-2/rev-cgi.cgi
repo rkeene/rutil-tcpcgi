@@ -1,4 +1,7 @@
-#!/usr/bin/tcl
+#! /usr/bin/tclsh
+
+
+package require Tclx
 
 
 proc extractargs {argv stdinlist envvar {list 0}} {
